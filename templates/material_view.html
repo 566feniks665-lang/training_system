@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Просмотр материала{% endblock %}
+
+{% block content %}
+    <h1 class="page-title">Просмотр материала</h1>
+
+    <section class="section">
+        <h2 class="section-title">{{ material.title }}</h2>
+
+        <div class="detail-grid">
+            <div>
+                <strong>Курс:</strong> {{ material.course.title }}
+            </div>
+            <div>
+                <strong>Дата добавления:</strong> {{ material.created_at.strftime('%d.%m.%Y %H:%M') }}
+            </div>
+        </div>
+
+        {% if material.content %}
+            <div class="material-content">
+                {{ material.content }}
+            </div>
+        {% else %}
+            <p>Текстовое описание для этого материала не добавлено.</p>
+        {% endif %}
+
+        <div class="actions" style="margin-top: 20px;">
+            {% if material.file_name %}
+                <a href="{{ url_for('uploaded_material', filename=material.file_name) }}" target="_blank" class="btn btn-primary">
+                    Открыть прикреплённый файл
+                </a>
+            {% endif %}
+            <a href="{{ url_for('materials', course_id=material.course_id) }}" class="btn btn-secondary">Назад к материалам</a>
+        </div>
+    </section>
+{% endblock %}

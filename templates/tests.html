@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Тесты{% endblock %}
+
+{% block content %}
+    <h1 class="page-title">
+        {% if current_user.role == 'employee' %}
+            Доступные тесты
+        {% else %}
+            Тесты
+        {% endif %}
+    </h1>
+
+    <section class="section">
+        <div class="actions" style="margin-bottom: 16px;">
+            {% if current_user.role == 'admin' %}
+                <a href="{{ url_for('create_test') }}" class="btn btn-primary">Добавить тест</a>
+            {% endif %}
+        </div>
+
+        {% if tests %}
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Курс</th>
+                            <th>Название</th>
+                            <th>Описание</th>
+                            <th>Проходной балл</th>
+                            <th>Вопросов в попытке</th>
+
+                            {% if current_user.role == 'employee' %}
+                                <th>Попытки</th>
+                                <th>Последний статус</th>
+                                <th>Действия</th>
+                            {% elif current_user.role == 'admin' %}
+                                <th>Максимум попыток</th>
+                                <th>Активен</th>
+                                <th>Действия</th>
+                            {% else %}
+                                <th>Максимум попыток</th>
+                                <th>Активен</th>
+                                <th>Примечание</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for test in tests %}
+                            {% set test_stats = attempt_stats.get(test.id) if attempt_stats else none %}
+                            <tr>
+                                <td>{{ test.course.title }}</td>
+                                <td>{{ test.title }}</td>
+                                <td>{{ test.description or '—' }}</td>
+                                <td>{{ test.pass_score }}%</td>
+                                <td>{{ test.question_count }}</td>
+
+                                {% if current_user.role == 'employee' %}
+                                    <td>
+                                        {{ test_stats.used if test_stats else 0 }} / {{ test.max_attempts }}
+                                        {% if test_stats %}
+                                            <div style="font-size: 13px; color: #6c7a89;">
+                                                Осталось: {{ test_stats.remaining }}
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ test_stats.latest_status if test_stats else '—' }}</td>
+                                    <td>
+                                        {% if not test.is_active %}
+                                            <span>Недоступен</span>
+                                        {% elif test_stats and test_stats.remaining == 0 %}
+                                            <span>Лимит попыток исчерпан</span>
+                                        {% else %}
+                                            <a href="{{ url_for('take_test', test_id=test.id) }}" class="btn btn-primary">
+                                                Пройти тест
+                                            </a>
+                                        {% endif %}
+                                    </td>
+                                {% elif current_user.role == 'admin' %}
+                                    <td>{{ test.max_attempts }}</td>
+                                    <td>{% if test.is_active %}Да{% else %}Нет{% endif %}</td>
+                                    <td>
+                                        <div class="actions">
+                                            <a href="{{ url_for('edit_test', test_id=test.id) }}" class="btn btn-warning">
+                                                Изменить
+                                            </a>
+
+                                            <a href="{{ url_for('questions', test_id=test.id) }}" class="btn btn-secondary">
+                                                Вопросы
+                                            </a>
+
+                                            <form
+                                                method="post"
+                                                action="{{ url_for('delete_test', test_id=test.id) }}"
+                                                data-confirm="delete"
+                                                data-confirm-message="Вы уверены, что хотите удалить тест?"
+                                                style="display: inline;"
+                                            >
+                                                <button type="submit" class="btn btn-danger">Удалить</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                {% else %}
+                                    <td>{{ test.max_attempts }}</td>
+                                    <td>{% if test.is_active %}Да{% else %}Нет{% endif %}</td>
+                                    <td>Прохождение тестов доступно только сотрудникам.</td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p>Тесты пока не добавлены.</p>
+        {% endif %}
+    </section>
+{% endblock %}

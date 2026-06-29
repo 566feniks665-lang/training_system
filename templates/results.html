@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if current_user.role == 'employee' %}
+        Мои результаты
+    {% else %}
+        Результаты
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    <h1 class="page-title">
+        {% if current_user.role == 'employee' %}
+            Мои результаты
+        {% else %}
+            Результаты
+        {% endif %}
+    </h1>
+
+    <section class="section">
+        {% if attempts %}
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            {% if current_user.role != 'employee' %}
+                                <th>Сотрудник</th>
+                            {% endif %}
+                            <th>Курс</th>
+                            <th>Тест</th>
+                            <th>Попытка</th>
+                            <th>Правильных ответов</th>
+                            <th>Всего вопросов</th>
+                            <th>Результат, %</th>
+                            <th>Статус</th>
+                            <th>Дата завершения</th>
+                            <th>Просмотр</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for attempt in attempts %}
+                            <tr>
+                                {% if current_user.role != 'employee' %}
+                                    <td>{{ attempt.user.full_name }}</td>
+                                {% endif %}
+                                <td>{{ attempt.test.course.title }}</td>
+                                <td>{{ attempt.test.title }}</td>
+                                <td>{{ attempt.attempt_number }}</td>
+                                <td>{{ attempt.correct_answers }}</td>
+                                <td>{{ attempt.total_questions }}</td>
+                                <td>{{ attempt.score_percent }}</td>
+                                <td>
+                                    {% if attempt.status == 'Пройдено' %}
+                                        <span class="result-status success" style="font-size: 16px; margin: 0;">
+                                            {{ attempt.status }}
+                                        </span>
+                                    {% else %}
+                                        <span class="result-status fail" style="font-size: 16px; margin: 0;">
+                                            {{ attempt.status }}
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if attempt.finished_at %}
+                                        {{ attempt.finished_at.strftime('%d.%m.%Y %H:%M') }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('test_result', attempt_id=attempt.id) }}" class="btn btn-primary">
+                                        Открыть
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p>Результаты пока отсутствуют.</p>
+        {% endif %}
+    </section>
+{% endblock %}

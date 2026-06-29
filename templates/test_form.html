@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if test %}
+        Редактирование теста
+    {% else %}
+        Создание теста
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    <h1 class="page-title">
+        {% if test %}
+            Редактирование теста
+        {% else %}
+            Создание теста
+        {% endif %}
+    </h1>
+
+    <section class="section">
+        <form method="post" class="form">
+            <div class="form-row">
+                <label for="course_id">Курс</label>
+                <select id="course_id" name="course_id" required>
+                    <option value="">Выберите курс</option>
+                    {% for course in courses %}
+                        <option
+                            value="{{ course.id }}"
+                            {% if test and test.course_id == course.id %}selected{% endif %}
+                        >
+                            {{ course.title }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="title">Название теста</label>
+                <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    required
+                    value="{{ test.title if test else '' }}"
+                    placeholder="Введите название теста"
+                >
+            </div>
+
+            <div class="form-row">
+                <label for="description">Описание теста</label>
+                <textarea
+                    id="description"
+                    name="description"
+                    placeholder="Введите описание теста"
+                >{{ test.description if test else '' }}</textarea>
+            </div>
+
+            <div class="form-inline">
+                <div class="form-row">
+                    <label for="pass_score">Проходной балл, %</label>
+                    <input
+                        type="number"
+                        id="pass_score"
+                        name="pass_score"
+                        min="1"
+                        max="100"
+                        required
+                        value="{{ test.pass_score if test else 70 }}"
+                    >
+                </div>
+
+                <div class="form-row">
+                    <label for="question_count">Количество вопросов</label>
+                    <input
+                        type="number"
+                        id="question_count"
+                        name="question_count"
+                        min="1"
+                        required
+                        value="{{ test.question_count if test else 10 }}"
+                    >
+                </div>
+
+                <div class="form-row">
+                    <label for="max_attempts">Максимум попыток</label>
+                    <input
+                        type="number"
+                        id="max_attempts"
+                        name="max_attempts"
+                        min="1"
+                        required
+                        value="{{ test.max_attempts if test else 3 }}"
+                    >
+                </div>
+            </div>
+
+            {% if test %}
+                <div class="form-row">
+                    <label class="answer-option">
+                        <input
+                            type="checkbox"
+                            name="is_active"
+                            value="1"
+                            {% if test.is_active %}checked{% endif %}
+                        >
+                        <span>Тест активен</span>
+                    </label>
+                </div>
+            {% endif %}
+
+            <div class="actions">
+                <button type="submit" class="btn btn-primary">
+                    {% if test %}Сохранить изменения{% else %}Создать тест{% endif %}
+                </button>
+                <a href="{{ url_for('tests') }}" class="btn btn-secondary">Отмена</a>
+            </div>
+        </form>
+    </section>
+{% endblock %}

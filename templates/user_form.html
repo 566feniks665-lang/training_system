@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if user_obj %}
+        Редактирование пользователя
+    {% else %}
+        Создание пользователя
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    <h1 class="page-title">
+        {% if user_obj %}
+            Редактирование пользователя
+        {% else %}
+            Создание пользователя
+        {% endif %}
+    </h1>
+
+    <section class="section">
+        <form method="post" class="form">
+            <div class="form-row">
+                <label for="full_name">ФИО</label>
+                <input
+                    type="text"
+                    id="full_name"
+                    name="full_name"
+                    required
+                    value="{{ user_obj.full_name if user_obj else '' }}"
+                    placeholder="Введите ФИО пользователя"
+                >
+            </div>
+
+            <div class="form-row">
+                <label for="login">Логин</label>
+                <input
+                    type="text"
+                    id="login"
+                    name="login"
+                    required
+                    value="{{ user_obj.login if user_obj else '' }}"
+                    placeholder="Введите логин"
+                >
+            </div>
+
+            <div class="form-row">
+                <label for="password">
+                    {% if user_obj %}
+                        Новый пароль
+                    {% else %}
+                        Пароль
+                    {% endif %}
+                </label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    {% if not user_obj %}required{% endif %}
+                    placeholder="{% if user_obj %}Оставьте пустым, если пароль менять не нужно{% else %}Введите пароль{% endif %}"
+                >
+            </div>
+
+            <div class="form-row">
+                <label for="role">Роль</label>
+                <select id="role" name="role" required>
+                    <option value="admin" {% if user_obj and user_obj.role == 'admin' %}selected{% endif %}>Администратор</option>
+                    <option value="employee" {% if user_obj and user_obj.role == 'employee' %}selected{% endif %}>Сотрудник</option>
+                    <option value="manager" {% if user_obj and user_obj.role == 'manager' %}selected{% endif %}>Руководитель</option>
+                    {% if not user_obj %}
+                        <option value="employee" selected>Сотрудник</option>
+                    {% endif %}
+                </select>
+            </div>
+
+            <div class="actions">
+                <button type="submit" class="btn btn-primary">
+                    {% if user_obj %}Сохранить изменения{% else %}Создать пользователя{% endif %}
+                </button>
+                <a href="{{ url_for('users') }}" class="btn btn-secondary">Отмена</a>
+            </div>
+        </form>
+    </section>
+{% endblock %}

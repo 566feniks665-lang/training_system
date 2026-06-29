@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if question %}
+        Редактирование вопроса
+    {% else %}
+        Добавление вопроса
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    <h1 class="page-title">
+        {% if question %}
+            Редактирование вопроса
+        {% else %}
+            Добавление вопроса
+        {% endif %}
+    </h1>
+
+    <section class="section">
+        <form method="post" class="form">
+            <div class="form-row">
+                <label for="test_id">Тест</label>
+                <select id="test_id" name="test_id" required>
+                    <option value="">Выберите тест</option>
+                    {% for test in tests %}
+                        <option
+                            value="{{ test.id }}"
+                            {% if question and question.test_id == test.id %}selected{% endif %}
+                        >
+                            {{ test.title }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="text">Текст вопроса</label>
+                <textarea
+                    id="text"
+                    name="text"
+                    required
+                    placeholder="Введите текст вопроса"
+                >{{ question.text if question else '' }}</textarea>
+            </div>
+
+            {% set option_1 = options[0].text if options and options|length > 0 else '' %}
+            {% set option_2 = options[1].text if options and options|length > 1 else '' %}
+            {% set option_3 = options[2].text if options and options|length > 2 else '' %}
+            {% set option_4 = options[3].text if options and options|length > 3 else '' %}
+
+            {% set ns = namespace(correct_option=0) %}
+            {% if options %}
+                {% for option in options %}
+                    {% if option.is_correct %}
+                        {% set ns.correct_option = loop.index %}
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+
+            <div class="form-row">
+                <label for="option_1">Вариант ответа 1</label>
+                <input
+                    type="text"
+                    id="option_1"
+                    name="option_1"
+                    required
+                    value="{{ option_1 }}"
+                    placeholder="Введите первый вариант ответа"
+                >
+            </div>
+
+            <div class="form-row">
+                <label for="option_2">Вариант ответа 2</label>
+                <input
+                    type="text"
+                    id="option_2"
+                    name="option_2"
+                    required
+                    value="{{ option_2 }}"
+                    placeholder="Введите второй вариант ответа"
+                >
+            </div>
+
+            <div class="form-row">
+                <label for="option_3">Вариант ответа 3</label>
+                <input
+                    type="text"
+                    id="option_3"
+                    name="option_3"
+                    value="{{ option_3 }}"
+                    placeholder="Введите третий вариант ответа"
+                >
+            </div>
+
+            <div class="form-row">
+                <label for="option_4">Вариант ответа 4</label>
+                <input
+                    type="text"
+                    id="option_4"
+                    name="option_4"
+                    value="{{ option_4 }}"
+                    placeholder="Введите четвёртый вариант ответа"
+                >
+            </div>
+
+            <div class="form-row">
+                <label for="correct_option">Правильный ответ</label>
+                <select id="correct_option" name="correct_option" required>
+                    <option value="">Выберите правильный вариант</option>
+                    <option value="1" {% if ns.correct_option == 1 %}selected{% endif %}>Вариант 1</option>
+                    <option value="2" {% if ns.correct_option == 2 %}selected{% endif %}>Вариант 2</option>
+                    <option value="3" {% if ns.correct_option == 3 %}selected{% endif %}>Вариант 3</option>
+                    <option value="4" {% if ns.correct_option == 4 %}selected{% endif %}>Вариант 4</option>
+                </select>
+            </div>
+
+            <div class="actions">
+                <button type="submit" class="btn btn-primary">
+                    {% if question %}Сохранить изменения{% else %}Добавить вопрос{% endif %}
+                </button>
+                <a href="{{ url_for('questions') }}" class="btn btn-secondary">Отмена</a>
+            </div>
+        </form>
+    </section>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Профиль{% endblock %}
+
+{% block content %}
+    <h1 class="page-title">Мой профиль</h1>
+
+    <section class="section" style="max-width: 720px;">
+        <form method="post" class="form">
+            <div class="form-row">
+                <label for="full_name">ФИО</label>
+                <input
+                    type="text"
+                    id="full_name"
+                    name="full_name"
+                    required
+                    value="{{ user_obj.full_name }}"
+                    placeholder="Введите ФИО"
+                >
+            </div>
+
+            <div class="form-row">
+                <label for="login">Логин</label>
+                <input
+                    type="text"
+                    id="login"
+                    value="{{ user_obj.login }}"
+                    disabled
+                >
+            </div>
+
+            <div class="form-row">
+                <label for="role">Роль</label>
+                <input
+                    type="text"
+                    id="role"
+                    value="{% if user_obj.role == 'admin' %}Администратор{% elif user_obj.role == 'manager' %}Руководитель{% else %}Сотрудник{% endif %}"
+                    disabled
+                >
+            </div>
+
+            <div class="form-row">
+                <label for="password">Новый пароль</label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Оставьте пустым, если пароль менять не нужно"
+                >
+            </div>
+
+            <div class="actions">
+                <button type="submit" class="btn btn-primary">Сохранить профиль</button>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Назад</a>
+            </div>
+        </form>
+    </section>
+{% endblock %}

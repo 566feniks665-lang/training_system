@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Главная страница{% endblock %}
+
+{% block content %}
+    <h1 class="page-title">Информационная система обучения и аттестации сотрудников</h1>
+
+    <section class="section">
+        <h2 class="section-title">О системе</h2>
+        <p>
+            Данная система предназначена для организации обучения сотрудников,
+            проведения аттестации, автоматической проверки результатов и
+            формирования отчётности. Пользователи системы могут изучать учебные
+            материалы, проходить тестирование и получать сведения о результатах.
+        </p>
+    </section>
+
+    <section class="section">
+        <h2 class="section-title">Основные возможности</h2>
+        <div class="question-list">
+            <div class="question-item">
+                <div class="question-title">Управление пользователями</div>
+                <p>Создание учётных записей, назначение ролей и разграничение доступа.</p>
+            </div>
+
+            <div class="question-item">
+                <div class="question-title">Работа с курсами и материалами</div>
+                <p>Создание курсов, добавление учебных материалов и назначение обучения сотрудникам.</p>
+            </div>
+
+            <div class="question-item">
+                <div class="question-title">Тестирование и аттестация</div>
+                <p>Формирование тестов, случайная выдача вопросов и автоматический расчёт результата.</p>
+            </div>
+
+            <div class="question-item">
+                <div class="question-title">Учёт результатов</div>
+                <p>Сохранение всех попыток, определение статуса прохождения и просмотр истории аттестации.</p>
+            </div>
+
+            <div class="question-item">
+                <div class="question-title">Отчётность</div>
+                <p>Просмотр сводных данных по сотрудникам, курсам и результатам тестирования.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2 class="section-title">Начало работы</h2>
+        <p style="margin-bottom: 16px;">
+            Для входа в систему используйте страницу авторизации.
+        </p>
+        <div class="actions">
+            <a href="{{ url_for('login') }}" class="btn btn-primary">Войти в систему</a>
+        </div>
+    </section>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Вопросы{% endblock %}
+
+{% block content %}
+    <h1 class="page-title">Вопросы</h1>
+
+    <section class="section">
+        <form method="get" class="form-inline" style="margin-bottom: 20px;">
+            <div class="form-row">
+                <label for="test_id">Фильтр по тесту</label>
+                <select id="test_id" name="test_id">
+                    <option value="">Все тесты</option>
+                    {% for test in tests %}
+                        <option
+                            value="{{ test.id }}"
+                            {% if test_id == test.id %}selected{% endif %}
+                        >
+                            {{ test.title }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="actions" style="align-self: end;">
+                <button type="submit" class="btn btn-primary">Показать</button>
+                <a href="{{ url_for('questions') }}" class="btn btn-secondary">Сбросить</a>
+            </div>
+        </form>
+
+        <div class="actions" style="margin-bottom: 16px;">
+            <a href="{{ url_for('create_question') }}" class="btn btn-primary">Добавить вопрос</a>
+        </div>
+
+        {% if questions %}
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Тест</th>
+                            <th>Вопрос</th>
+                            <th>Варианты ответов</th>
+                            <th>Правильный ответ</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for question in questions %}
+                            <tr>
+                                <td>{{ question.test.title }}</td>
+                                <td>{{ question.text }}</td>
+                                <td>
+                                    {% if question.options %}
+                                        {% for option in question.options %}
+                                            <div>{{ loop.index }}. {{ option.text }}</div>
+                                        {% endfor %}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% set ns = namespace(correct_text='—') %}
+                                    {% for option in question.options %}
+                                        {% if option.is_correct %}
+                                            {% set ns.correct_text = option.text %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    {{ ns.correct_text }}
+                                </td>
+                                <td>
+                                    <div class="actions">
+                                        <a href="{{ url_for('edit_question', question_id=question.id) }}" class="btn btn-warning">
+                                            Изменить
+                                        </a>
+
+                                        <form
+                                            method="post"
+                                            action="{{ url_for('delete_question', question_id=question.id) }}"
+                                            data-confirm="delete"
+                                            data-confirm-message="Вы уверены, что хотите удалить вопрос?"
+                                            style="display: inline;"
+                                        >
+                                            <button type="submit" class="btn btn-danger">Удалить</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p>Вопросы пока не добавлены.</p>
+        {% endif %}
+    </section>
+{% endblock %}

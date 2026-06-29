@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Вход в систему{% endblock %}
+
+{% block content %}
+    <h1 class="page-title">Вход в систему</h1>
+
+    <section class="section" style="max-width: 480px; margin: 0 auto;">
+        <form method="post" class="form">
+            <div class="form-row">
+                <label for="login">Логин</label>
+                <input
+                    type="text"
+                    id="login"
+                    name="login"
+                    required
+                    placeholder="Введите логин"
+                >
+            </div>
+
+            <div class="form-row">
+                <label for="password">Пароль</label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    required
+                    placeholder="Введите пароль"
+                >
+            </div>
+
+            <div class="actions">
+                <button type="submit" class="btn btn-primary">Войти</button>
+                <a href="{{ url_for('index') }}" class="btn btn-secondary">На главную</a>
+            </div>
+        </form>
+    </section>
+{% endblock %}

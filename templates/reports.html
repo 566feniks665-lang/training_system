@@ -1,0 +1,265 @@
+{% extends "base.html" %}
+
+{% block title %}Отчёты{% endblock %}
+
+{% block content %}
+    <h1 class="page-title">Отчёты</h1>
+
+    <section class="section">
+        <h2 class="section-title">Фильтры</h2>
+
+        <form method="get" class="form-inline">
+            <div class="form-row">
+                <label for="user_id">Сотрудник</label>
+                <select id="user_id" name="user_id">
+                    <option value="">Все сотрудники</option>
+                    {% for user in users %}
+                        <option
+                            value="{{ user.id }}"
+                            {% if selected_user_id == user.id %}selected{% endif %}
+                        >
+                            {{ user.full_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="course_id">Курс</label>
+                <select id="course_id" name="course_id">
+                    <option value="">Все курсы</option>
+                    {% for course in courses %}
+                        <option
+                            value="{{ course.id }}"
+                            {% if selected_course_id == course.id %}selected{% endif %}
+                        >
+                            {{ course.title }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="test_id">Тест</label>
+                <select id="test_id" name="test_id">
+                    <option value="">Все тесты</option>
+                    {% for test in tests %}
+                        <option
+                            value="{{ test.id }}"
+                            {% if selected_test_id == test.id %}selected{% endif %}
+                        >
+                            {{ test.title }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="actions" style="align-self: end;">
+                <button type="submit" class="btn btn-primary">Показать</button>
+                <a href="{{ url_for('reports') }}" class="btn btn-secondary">Сбросить</a>
+            </div>
+        </form>
+    </section>
+
+    <div class="cards">
+        <div class="card">
+            <h3>Всего попыток</h3>
+            <p>{{ attempts|length }}</p>
+        </div>
+
+        <div class="card">
+            <h3>Пройдено попыток</h3>
+            <p>{{ passed_count }}</p>
+        </div>
+
+        <div class="card">
+            <h3>Не пройдено попыток</h3>
+            <p>{{ failed_count }}</p>
+        </div>
+
+        <div class="card">
+            <h3>Итогово пройдено</h3>
+            <p>{{ latest_passed_count }}</p>
+        </div>
+
+        <div class="card">
+            <h3>Итогово не пройдено</h3>
+            <p>{{ latest_failed_count }}</p>
+        </div>
+
+        <div class="card">
+            <h3>Средний результат</h3>
+            <p>{{ average_score }}%</p>
+        </div>
+    </div>
+
+    <section class="section">
+        <h2 class="section-title">Сводка по сотрудникам и тестам</h2>
+
+        {% if summary_rows %}
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Сотрудник</th>
+                            <th>Курс</th>
+                            <th>Тест</th>
+                            <th>Количество попыток</th>
+                            <th>Лучший результат</th>
+                            <th>Последний результат</th>
+                            <th>Итоговый статус</th>
+                            <th>Дата последней попытки</th>
+                            <th>Просмотр</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in summary_rows %}
+                            <tr>
+                                <td>{{ item.user.full_name }}</td>
+                                <td>{{ item.course.title }}</td>
+                                <td>{{ item.test.title }}</td>
+                                <td>{{ item.attempts_count }}</td>
+                                <td>{{ item.best_score }}%</td>
+                                <td>{{ item.latest_score }}%</td>
+                                <td>
+                                    {% if item.latest_status == 'Пройдено' %}
+                                        <span class="result-status success" style="font-size: 16px; margin: 0;">
+                                            {{ item.latest_status }}
+                                        </span>
+                                    {% else %}
+                                        <span class="result-status fail" style="font-size: 16px; margin: 0;">
+                                            {{ item.latest_status }}
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if item.latest_date %}
+                                        {{ item.latest_date.strftime('%d.%m.%Y %H:%M') }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('test_result', attempt_id=item.latest_attempt_id) }}" class="btn btn-primary">
+                                        Открыть
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p>По выбранным параметрам сводные данные отсутствуют.</p>
+        {% endif %}
+    </section>
+
+    <section class="section">
+        <h2 class="section-title">Список прошедших и не прошедших аттестацию</h2>
+
+        {% if summary_rows %}
+            <div class="summary-grid">
+                <div class="summary-panel">
+                    <h3>Пройдено</h3>
+                    {% set passed_rows = summary_rows | selectattr('latest_status', 'equalto', 'Пройдено') | list %}
+                    {% if passed_rows %}
+                        <div class="summary-list">
+                            {% for item in passed_rows %}
+                                <div class="summary-list-item">
+                                    <strong>{{ item.user.full_name }}</strong><br>
+                                    {{ item.test.title }} ({{ item.course.title }})<br>
+                                    Попыток: {{ item.attempts_count }}, лучший результат: {{ item.best_score }}%
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p>Нет сотрудников со статусом «Пройдено».</p>
+                    {% endif %}
+                </div>
+
+                <div class="summary-panel">
+                    <h3>Не пройдено</h3>
+                    {% set failed_rows = summary_rows | selectattr('latest_status', 'equalto', 'Не пройдено') | list %}
+                    {% if failed_rows %}
+                        <div class="summary-list">
+                            {% for item in failed_rows %}
+                                <div class="summary-list-item">
+                                    <strong>{{ item.user.full_name }}</strong><br>
+                                    {{ item.test.title }} ({{ item.course.title }})<br>
+                                    Попыток: {{ item.attempts_count }}, лучший результат: {{ item.best_score }}%
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p>Нет сотрудников со статусом «Не пройдено».</p>
+                    {% endif %}
+                </div>
+            </div>
+        {% else %}
+            <p>По выбранным параметрам данные отсутствуют.</p>
+        {% endif %}
+    </section>
+
+    <section class="section">
+        <h2 class="section-title">Журнал всех попыток</h2>
+
+        {% if attempts %}
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Сотрудник</th>
+                            <th>Курс</th>
+                            <th>Тест</th>
+                            <th>Попытка</th>
+                            <th>Правильных ответов</th>
+                            <th>Всего вопросов</th>
+                            <th>Результат, %</th>
+                            <th>Статус</th>
+                            <th>Дата</th>
+                            <th>Просмотр</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for attempt in attempts %}
+                            <tr>
+                                <td>{{ attempt.user.full_name }}</td>
+                                <td>{{ attempt.test.course.title }}</td>
+                                <td>{{ attempt.test.title }}</td>
+                                <td>{{ attempt.attempt_number }}</td>
+                                <td>{{ attempt.correct_answers }}</td>
+                                <td>{{ attempt.total_questions }}</td>
+                                <td>{{ attempt.score_percent }}</td>
+                                <td>
+                                    {% if attempt.status == 'Пройдено' %}
+                                        <span class="result-status success" style="font-size: 16px; margin: 0;">
+                                            {{ attempt.status }}
+                                        </span>
+                                    {% else %}
+                                        <span class="result-status fail" style="font-size: 16px; margin: 0;">
+                                            {{ attempt.status }}
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if attempt.finished_at %}
+                                        {{ attempt.finished_at.strftime('%d.%m.%Y %H:%M') }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('test_result', attempt_id=attempt.id) }}" class="btn btn-primary">
+                                        Открыть
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p>По выбранным параметрам данные отсутствуют.</p>
+        {% endif %}
+    </section>
+{% endblock %}

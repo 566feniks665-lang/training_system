@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Результат тестирования{% endblock %}
+
+{% block content %}
+    <h1 class="page-title">Результат тестирования</h1>
+
+    <div class="result-box">
+        <h2>{{ attempt.test.title }}</h2>
+
+        <p><strong>Курс:</strong> {{ attempt.test.course.title }}</p>
+        <p><strong>Пользователь:</strong> {{ attempt.user.full_name }}</p>
+        <p><strong>Номер попытки:</strong> {{ attempt.attempt_number }}</p>
+
+        <div class="result-status {% if attempt.status == 'Пройдено' %}success{% else %}fail{% endif %}">
+            {{ attempt.status }}
+        </div>
+
+        <p><strong>Правильных ответов:</strong> {{ attempt.correct_answers }} из {{ attempt.total_questions }}</p>
+        <p><strong>Результат:</strong> {{ attempt.score_percent }}%</p>
+        <p><strong>Проходной балл:</strong> {{ attempt.test.pass_score }}%</p>
+
+        {% if attempt.finished_at %}
+            <p><strong>Дата завершения:</strong> {{ attempt.finished_at.strftime('%d.%m.%Y %H:%M') }}</p>
+        {% endif %}
+    </div>
+
+    <section class="section">
+        <h2 class="section-title">Детализация ответов</h2>
+
+        {% if attempt.answers %}
+            <div class="question-list">
+                {% for answer in attempt.answers %}
+                    <div class="question-item">
+                        <div class="question-title">
+                            {{ loop.index }}. {{ answer.question.text }}
+                        </div>
+
+                        <p>
+                            <strong>Выбранный ответ:</strong>
+                            {% if answer.selected_option %}
+                                {{ answer.selected_option.text }}
+                            {% else %}
+                                Ответ не выбран
+                            {% endif %}
+                        </p>
+
+                        {% set ns = namespace(correct_text='') %}
+                        {% for option in answer.question.options %}
+                            {% if option.is_correct %}
+                                {% set ns.correct_text = option.text %}
+                            {% endif %}
+                        {% endfor %}
+
+                        <p><strong>Правильный ответ:</strong> {{ ns.correct_text }}</p>
+
+                        <p>
+                            <strong>Статус:</strong>
+                            {% if answer.is_correct %}
+                                <span class="result-status success" style="font-size: 16px; margin: 0;">
+                                    Верно
+                                </span>
+                            {% else %}
+                                <span class="result-status fail" style="font-size: 16px; margin: 0;">
+                                    Неверно
+                                </span>
+                            {% endif %}
+                        </p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>Ответы по этой попытке отсутствуют.</p>
+        {% endif %}
+    </section>
+
+    <div class="actions">
+        <a href="{{ url_for('results') }}" class="btn btn-secondary">Назад к результатам</a>
+
+        {% if current_user.role == 'employee' and attempt.status == 'Не пройдено' and attempt.test.is_active %}
+            <a href="{{ url_for('take_test', test_id=attempt.test.id) }}" class="btn btn-primary">
+                Пройти тест снова
+            </a>
+        {% endif %}
+    </div>
+{% endblock %}

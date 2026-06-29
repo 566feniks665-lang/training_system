@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Материалы{% endblock %}
+
+{% block content %}
+    <h1 class="page-title">
+        {% if current_user.role == 'employee' %}
+            Учебные материалы
+        {% else %}
+            Материалы
+        {% endif %}
+    </h1>
+
+    <section class="section">
+        <div class="actions" style="margin-bottom: 16px;">
+            {% if current_user.role == 'admin' %}
+                <a href="{{ url_for('create_material') }}" class="btn btn-primary">Добавить материал</a>
+            {% endif %}
+        </div>
+
+        {% if materials %}
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Курс</th>
+                            <th>Название</th>
+                            <th>Краткое описание</th>
+                            <th>Файл</th>
+                            <th>Дата добавления</th>
+                            <th>Просмотр</th>
+                            {% if current_user.role == 'admin' %}
+                                <th>Управление</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for material in materials %}
+                            <tr>
+                                <td>{{ material.course.title }}</td>
+                                <td>{{ material.title }}</td>
+                                <td>{{ material.content[:200] ~ ('...' if material.content and material.content|length > 200 else '') if material.content else '—' }}</td>
+                                <td>
+                                    {% if material.file_name %}
+                                        <a href="{{ url_for('uploaded_material', filename=material.file_name) }}" target="_blank">
+                                            Открыть файл
+                                        </a>
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                                <td>{{ material.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                                <td>
+                                    <a href="{{ url_for('material_detail', material_id=material.id) }}" class="btn btn-secondary">
+                                        Открыть
+                                    </a>
+                                </td>
+
+                                {% if current_user.role == 'admin' %}
+                                    <td>
+                                        <div class="actions">
+                                            <a href="{{ url_for('edit_material', material_id=material.id) }}" class="btn btn-warning">
+                                                Изменить
+                                            </a>
+
+                                            <form
+                                                method="post"
+                                                action="{{ url_for('delete_material', material_id=material.id) }}"
+                                                data-confirm="delete"
+                                                data-confirm-message="Вы уверены, что хотите удалить материал?"
+                                                style="display: inline;"
+                                            >
+                                                <button type="submit" class="btn btn-danger">Удалить</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p>Материалы пока не добавлены.</p>
+        {% endif %}
+    </section>
+{% endblock %}

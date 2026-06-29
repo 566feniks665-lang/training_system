@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Прохождение теста{% endblock %}
+
+{% block content %}
+    <h1 class="page-title">Прохождение теста</h1>
+
+    <section class="section">
+        <h2 class="section-title">{{ test.title }}</h2>
+
+        {% if test.description %}
+            <p style="margin-bottom: 16px;">{{ test.description }}</p>
+        {% endif %}
+
+        <div style="margin-bottom: 16px;">
+            <p><strong>Курс:</strong> {{ test.course.title }}</p>
+            <p><strong>Проходной балл:</strong> {{ test.pass_score }}%</p>
+            <p><strong>Количество вопросов:</strong> {{ questions|length }}</p>
+        </div>
+
+        {% if questions %}
+            <form method="post" class="form">
+                <div class="question-list">
+                    {% for question in questions %}
+                        <div class="question-item">
+                            <div class="question-title">
+                                {{ loop.index }}. {{ question.text }}
+                            </div>
+
+                            <div class="answer-options">
+                                {% for option in question.options %}
+                                    <label class="answer-option">
+                                        <input
+                                            type="radio"
+                                            name="question_{{ question.id }}"
+                                            value="{{ option.id }}"
+                                            required
+                                        >
+                                        <span>{{ option.text }}</span>
+                                    </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="actions" style="margin-top: 20px;">
+                    <button type="submit" class="btn btn-primary">Завершить тест</button>
+                    <a href="{{ url_for('tests') }}" class="btn btn-secondary">Отмена</a>
+                </div>
+            </form>
+        {% else %}
+            <p>Вопросы для данного теста отсутствуют.</p>
+            <div class="actions" style="margin-top: 16px;">
+                <a href="{{ url_for('tests') }}" class="btn btn-secondary">Назад</a>
+            </div>
+        {% endif %}
+    </section>
+{% endblock %}

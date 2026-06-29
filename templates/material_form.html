@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if material %}
+        Редактирование материала
+    {% else %}
+        Добавление материала
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    <h1 class="page-title">
+        {% if material %}
+            Редактирование материала
+        {% else %}
+            Добавление материала
+        {% endif %}
+    </h1>
+
+    <section class="section">
+        <form method="post" class="form" enctype="multipart/form-data">
+            <div class="form-row">
+                <label for="course_id">Курс</label>
+                <select id="course_id" name="course_id" required>
+                    <option value="">Выберите курс</option>
+                    {% for course in courses %}
+                        <option
+                            value="{{ course.id }}"
+                            {% if material and material.course_id == course.id %}selected{% endif %}
+                        >
+                            {{ course.title }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="title">Название материала</label>
+                <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    required
+                    value="{{ material.title if material else '' }}"
+                    placeholder="Введите название материала"
+                >
+            </div>
+
+            <div class="form-row">
+                <label for="content">Текст материала</label>
+                <textarea
+                    id="content"
+                    name="content"
+                    placeholder="Введите текст учебного материала"
+                >{{ material.content if material else '' }}</textarea>
+            </div>
+
+            <div class="form-row">
+                <label for="file">Файл материала</label>
+                <input type="file" id="file" name="file">
+
+                {% if material and material.file_name %}
+                    <p>
+                        Текущий файл:
+                        <a href="{{ url_for('uploaded_material', filename=material.file_name) }}" target="_blank">
+                            {{ material.file_name }}
+                        </a>
+                    </p>
+                {% endif %}
+            </div>
+
+            <div class="actions">
+                <button type="submit" class="btn btn-primary">
+                    {% if material %}Сохранить изменения{% else %}Добавить материал{% endif %}
+                </button>
+                <a href="{{ url_for('materials') }}" class="btn btn-secondary">Отмена</a>
+            </div>
+        </form>
+    </section>
+{% endblock %}

@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if assign_mode %}
+        Назначение курса
+    {% elif course %}
+        Редактирование курса
+    {% else %}
+        Создание курса
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    {% if assign_mode %}
+        <h1 class="page-title">Назначение курса сотрудникам</h1>
+    {% elif course %}
+        <h1 class="page-title">Редактирование курса</h1>
+    {% else %}
+        <h1 class="page-title">Создание курса</h1>
+    {% endif %}
+
+    <section class="section">
+        {% if assign_mode %}
+            <h2 class="section-title">Курс: {{ course.title }}</h2>
+
+            <form method="post" class="form">
+                {% if employees %}
+                    <div class="form-row">
+                        <label>Выберите сотрудников</label>
+                        <div class="question-list">
+                            {% for employee in employees %}
+                                <div class="question-item">
+                                    <label class="answer-option">
+                                        <input
+                                            type="checkbox"
+                                            name="user_ids"
+                                            value="{{ employee.id }}"
+                                            {% if assigned_user_ids and employee.id in assigned_user_ids %}checked{% endif %}
+                                        >
+                                        <span>{{ employee.full_name }} ({{ employee.login }})</span>
+                                    </label>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="actions">
+                        <button type="submit" class="btn btn-primary">Назначить курс</button>
+                        <a href="{{ url_for('courses') }}" class="btn btn-secondary">Назад</a>
+                    </div>
+                {% else %}
+                    <p>Сотрудники для назначения не найдены.</p>
+                    <div class="actions">
+                        <a href="{{ url_for('courses') }}" class="btn btn-secondary">Назад</a>
+                    </div>
+                {% endif %}
+            </form>
+        {% else %}
+            <form method="post" class="form">
+                <div class="form-row">
+                    <label for="title">Название курса</label>
+                    <input
+                        type="text"
+                        id="title"
+                        name="title"
+                        required
+                        value="{{ course.title if course else '' }}"
+                        placeholder="Введите название курса"
+                    >
+                </div>
+
+                <div class="form-row">
+                    <label for="description">Описание курса</label>
+                    <textarea
+                        id="description"
+                        name="description"
+                        placeholder="Введите краткое описание курса"
+                    >{{ course.description if course else '' }}</textarea>
+                </div>
+
+                <div class="actions">
+                    <button type="submit" class="btn btn-primary">
+                        {% if course %}Сохранить изменения{% else %}Создать курс{% endif %}
+                    </button>
+                    <a href="{{ url_for('courses') }}" class="btn btn-secondary">Отмена</a>
+                </div>
+            </form>
+        {% endif %}
+    </section>
+{% endblock %}

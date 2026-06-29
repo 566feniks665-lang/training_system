@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block title %}Личный кабинет{% endblock %}
+
+{% block content %}
+    <h1 class="page-title">Личный кабинет</h1>
+
+    {% if current_user.role == 'admin' %}
+        <div class="cards">
+            <div class="card">
+                <h3>Пользователи</h3>
+                <p>{{ users_count }}</p>
+            </div>
+
+            <div class="card">
+                <h3>Курсы</h3>
+                <p>{{ courses_count }}</p>
+            </div>
+
+            <div class="card">
+                <h3>Тесты</h3>
+                <p>{{ tests_count }}</p>
+            </div>
+
+            <div class="card">
+                <h3>Попытки</h3>
+                <p>{{ attempts_count }}</p>
+            </div>
+        </div>
+
+        <section class="section">
+            <h2 class="section-title">Быстрый доступ</h2>
+            <div class="actions">
+                <a href="{{ url_for('users') }}" class="btn btn-primary">Пользователи</a>
+                <a href="{{ url_for('courses') }}" class="btn btn-primary">Курсы</a>
+                <a href="{{ url_for('materials') }}" class="btn btn-primary">Материалы</a>
+                <a href="{{ url_for('tests') }}" class="btn btn-primary">Тесты</a>
+                <a href="{{ url_for('questions') }}" class="btn btn-primary">Вопросы</a>
+                <a href="{{ url_for('reports') }}" class="btn btn-primary">Отчёты</a>
+            </div>
+        </section>
+
+    {% elif current_user.role == 'manager' %}
+        <div class="cards">
+            <div class="card">
+                <h3>Сотрудники</h3>
+                <p>{{ manager_stats.employees_count }}</p>
+            </div>
+
+            <div class="card">
+                <h3>Курсы</h3>
+                <p>{{ manager_stats.courses_count }}</p>
+            </div>
+
+            <div class="card">
+                <h3>Тесты</h3>
+                <p>{{ manager_stats.tests_count }}</p>
+            </div>
+
+            <div class="card">
+                <h3>Аттестация пройдена</h3>
+                <p>{{ manager_stats.passed_count }}</p>
+            </div>
+        </div>
+
+        <section class="section">
+            <h2 class="section-title">Последние результаты сотрудников</h2>
+
+            {% if results %}
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Сотрудник</th>
+                                <th>Курс</th>
+                                <th>Тест</th>
+                                <th>Попытка</th>
+                                <th>Результат, %</th>
+                                <th>Статус</th>
+                                <th>Дата</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for attempt in results %}
+                                <tr>
+                                    <td>{{ attempt.user.full_name }}</td>
+                                    <td>{{ attempt.test.course.title }}</td>
+                                    <td>{{ attempt.test.title }}</td>
+                                    <td>{{ attempt.attempt_number }}</td>
+                                    <td>{{ attempt.score_percent }}</td>
+                                    <td>
+                                        {% if attempt.status == 'Пройдено' %}
+                                            <span class="result-status success" style="font-size: 16px; margin: 0;">
+                                                {{ attempt.status }}
+                                            </span>
+                                        {% else %}
+                                            <span class="result-status fail" style="font-size: 16px; margin: 0;">
+                                                {{ attempt.status }}
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if attempt.finished_at %}
+                                            {{ attempt.finished_at.strftime('%d.%m.%Y %H:%M') }}
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="actions" style="margin-top: 16px;">
+                    <a href="{{ url_for('reports') }}" class="btn btn-primary">Перейти к отчётам</a>
+                    <a href="{{ url_for('results') }}" class="btn btn-secondary">Все результаты</a>
+                </div>
+            {% else %}
+                <p>Результаты пока отсутствуют.</p>
+            {% endif %}
+        </section>
+
+    {% else %}
+        <section class="section">
+            <h2 class="section-title">Назначенные курсы</h2>
+
+            {% if assigned_courses %}
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Название курса</th>
+                                <th>Описание</th>
+                                <th>Материалы</th>
+                                <th>Тесты</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for course in assigned_courses %}
+                                <tr>
+                                    <td>{{ course.title }}</td>
+                                    <td>{{ course.description or '—' }}</td>
+                                    <td>
+                                        <a href="{{ url_for('materials', course_id=course.id) }}" class="btn btn-secondary">
+                                            Открыть
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('tests', course_id=course.id) }}" class="btn btn-primary">
+                                            Перейти
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p>Вам пока не назначены курсы.</p>
+            {% endif %}
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">Мои последние результаты</h2>
+
+            {% if my_attempts %}
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Курс</th>
+                                <th>Тест</th>
+                                <th>Попытка</th>
+                                <th>Результат, %</th>
+                                <th>Статус</th>
+                                <th>Дата</th>
+                                <th>Просмотр</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for attempt in my_attempts[:5] %}
+                                <tr>
+                                    <td>{{ attempt.test.course.title }}</td>
+                                    <td>{{ attempt.test.title }}</td>
+                                    <td>{{ attempt.attempt_number }}</td>
+                                    <td>{{ attempt.score_percent }}</td>
+                                    <td>
+                                        {% if attempt.status == 'Пройдено' %}
+                                            <span class="result-status success" style="font-size: 16px; margin: 0;">
+                                                {{ attempt.status }}
+                                            </span>
+                                        {% else %}
+                                            <span class="result-status fail" style="font-size: 16px; margin: 0;">
+                                                {{ attempt.status }}
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if attempt.finished_at %}
+                                            {{ attempt.finished_at.strftime('%d.%m.%Y %H:%M') }}
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('test_result', attempt_id=attempt.id) }}" class="btn btn-primary">
+                                            Открыть
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="actions" style="margin-top: 16px;">
+                    <a href="{{ url_for('results') }}" class="btn btn-secondary">Все результаты</a>
+                </div>
+            {% else %}
+                <p>Вы ещё не проходили тестирование.</p>
+            {% endif %}
+        </section>
+    {% endif %}
+{% endblock %}
